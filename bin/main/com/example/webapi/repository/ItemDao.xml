@@ -6,4 +6,8 @@
         select id, title, content, status from items order by id
     </select>
 
+    <select id="selectByKey" resultType="com.example.webapi.entity.Item">
+        select id, title, content, status from items where id = #{id}
+    </select>
+
 </mapper>

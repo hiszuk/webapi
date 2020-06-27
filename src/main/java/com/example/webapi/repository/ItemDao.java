@@ -11,4 +11,6 @@ public interface ItemDao {
 
     List<Item> selectAll();
     
+    Item selectByKey(int id);
+    
 }

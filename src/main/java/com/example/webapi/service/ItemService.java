@@ -18,4 +18,8 @@ public class ItemService {
         return itemMapper.selectAll();
     }
 
+    public Item selectByKey(int id) {
+        return itemMapper.selectByKey( id );
+    }
+
 }
