@@ -13,4 +13,9 @@ public interface ItemDao {
     
     Item selectByKey(int id);
     
+    void updateByKey(Item item);
+    
+    void deleteByKey(int id);
+
+    void createNew(Item item);
 }

@@ -10,4 +10,20 @@
         select id, title, content, status from items where id = #{id}
     </select>
 
+    <update id="updateByKey" parameterType="com.example.webapi.entity.Item">
+        insert into items (id, title, content, status, created, updated) 
+        values ( #{id}, #{title}, #{content}, #{status}, now(), now() ) 
+        on duplicate key update
+        title = #{title}, content = #{content}, status = #{status}, updated = now()
+    </update>
+
+    <delete id="deleteByKey" parameterType="int">
+        delete from items where id = #{id}
+    </delete>
+
+    <insert id="createNew" useGeneratedKeys="true" keyProperty="id" parameterType="com.example.webapi.entity.Item">
+        insert into items (title, content, status, created, updated) 
+        values ( #{title}, #{content}, #{status}, now(), now() ) 
+    </insert>
+
 </mapper>
