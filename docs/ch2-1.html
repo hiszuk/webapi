@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>バックエンド第1回 新規プロジェクト作成と動作確認</title>
+        <style>
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="バックエンド第1回-新規プロジェクト作成と動作確認">バックエンド第1回 新規プロジェクト作成と動作確認</h1>
+<ul>
+<li><a href="#%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89%E7%AC%AC1%E5%9B%9E-%E6%96%B0%E8%A6%8F%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E4%BD%9C%E6%88%90%E3%81%A8%E5%8B%95%E4%BD%9C%E7%A2%BA%E8%AA%8D">バックエンド第1回 新規プロジェクト作成と動作確認</a>
+<ul>
+<li><a href="#%E6%96%B0%E8%A6%8F%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E4%BD%9C%E6%88%90">新規プロジェクト作成</a>
+<ul>
+<li><a href="#spring-initializr-%E3%81%A7%E4%BD%9C%E6%88%90%E3%81%99%E3%82%8B">spring initializr で作成する</a></li>
+<li><a href="#%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%E3%81%97%E3%81%9Fzip%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%92%E5%B1%95%E9%96%8B">ダウンロードしたzipファイルを展開</a></li>
+<li><a href="#%E8%A8%AD%E5%AE%9A%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%83%80%E3%82%A6%E3%83%B3%E3%83%AD%E3%83%BC%E3%83%89%E3%81%A8%E3%83%95%E3%82%A9%E3%83%AB%E3%83%80%E3%81%B8%E3%81%AE%E9%85%8D%E7%BD%AE">設定ファイルダウンロードとフォルダへの配置</a></li>
+</ul>
+</li>
+<li><a href="#%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AE%E3%83%93%E3%83%AB%E3%83%89">プロジェクトのビルド</a>
+<ul>
+<li><a href="#%E4%BA%8B%E5%89%8D%E6%BA%96%E5%82%99">事前準備</a></li>
+<li><a href="#%E3%83%AA%E3%83%A2%E3%83%BC%E3%83%88db%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95">リモートDB使用方法</a></li>
+<li><a href="#%E3%83%93%E3%83%AB%E3%83%89%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E5%AE%9F%E8%A1%8C">ビルドコマンド実行</a></li>
+</ul>
+</li>
+<li><a href="#%E5%8B%95%E4%BD%9C%E7%A2%BA%E8%AA%8D%E7%94%A8%E3%83%9A%E3%83%BC%E3%82%B8%E3%81%AE%E4%BD%9C%E6%88%90">動作確認用ページの作成</a>
+<ul>
+<li><a href="#%E3%83%95%E3%82%A9%E3%83%AB%E3%83%80%E4%BD%93%E7%B3%BB%E3%82%92%E4%BD%9C%E6%88%90">フォルダ体系を作成</a></li>
+<li><a href="#%E5%8B%95%E4%BD%9C%E7%A2%BA%E8%AA%8D%E7%94%A8%E3%83%9A%E3%83%BC%E3%82%B8%E4%BD%9C%E6%88%90">動作確認用ページ作成</a></li>
+<li><a href="#%E3%83%93%E3%83%AB%E3%83%89%E3%81%97%E3%81%BE%E3%81%99">ビルドします</a></li>
+<li><a href="#%E8%B5%B7%E5%8B%95%E3%81%97%E3%81%BE%E3%81%99">起動します</a></li>
+<li><a href="#%E3%83%80%E3%83%83%E3%82%B7%E3%83%A5%E3%83%9C%E3%83%BC%E3%83%89%E3%81%8B%E3%82%89%E8%B5%B7%E5%8B%95">ダッシュボードから起動</a></li>
+<li><a href="#gradlew%E3%81%A7%E8%B5%B7%E5%8B%95">gradlewで起動</a></li>
+<li><a href="#%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89%E3%83%A9%E3%82%A4%E3%83%B3%E3%81%8B%E3%82%89%E8%B5%B7%E5%8B%95">コマンドラインから起動</a></li>
+</ul>
+</li>
+<li><a href="#%E5%8B%95%E4%BD%9C%E7%A2%BA%E8%AA%8D">動作確認</a>
+<ul>
+<li><a href="#web%E3%83%96%E3%83%A9%E3%82%A6%E3%82%B6%E3%81%A7%E7%A2%BA%E8%AA%8D">WEBブラウザで確認</a></li>
+<li><a href="#postman%E3%81%A7%E7%A2%BA%E8%AA%8D">Postmanで確認</a></li>
+</ul>
+</li>
+<li><a href="#%E3%81%BE%E3%81%A8%E3%82%81">まとめ</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="新規プロジェクト作成">新規プロジェクト作成</h2>
+<h3 id="spring-initializr-で作成する">spring initializr で作成する</h3>
+<p>下記URLにアクセスします</p>
+<p><a href="https://start.spring.io/">https://start.spring.io/</a></p>
+<p>以下のようにオプションを選択します。</p>
+<blockquote>
+<p><code>Project:</code> Gradle Project<br/>
+<code>Language:</code> Java<br/>
+<code>Spring Boot:</code> 2.3.1<br/>
+<code>Project Metadata</code><br></p>
+<blockquote>
+<p><code>Group:</code> com.example<br/>
+<code>Artifact:</code> webapi<br/>
+<code>Name:</code> webapi<br/>
+<code>Description:</code> Demo project for Spring Boot<br/>
+<code>Package Name:</code> com.example.webapi<br/>
+<code>Packaging:</code> jar<br/>
+<code>Java:</code> 8</p>
+</blockquote>
+<p><code>Dependencies</code><br/></p>
+<blockquote>
+<p><code>Spring Boot DevTools</code> <br/>
+<code>Lombok</code> <br/>
+<code>Spring Web</code> <br/>
+<code>JDBC API</code> <br/>
+<code>MyBatis Framework</code> <br/>
+<code>MySQL Driver</code> <br/></p>
+</blockquote>
+</blockquote>
+<p><code>Dependencies</code>は<code>ADD DEPENDENCIES.. Ctrl + B</code> ボタンをクリックして一覧から選択します。</p>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-1-01.png" alt=""></p>
+<p>選択後、<code>GENERATE CTRL+[Enter]</code> ボタンをクリックします。</p>
+<p>webapi.zip がダウンロードされます。</p>
+<h3 id="ダウンロードしたzipファイルを展開">ダウンロードしたzipファイルを展開</h3>
+<p>ダウンロードした webapi.zipを作業フォルダに展開します。</p>
+<pre><code><code><div>.
+./.gitignore
+./build.gradle
+./gradle
+./gradle/wrapper
+./gradle/wrapper/gradle-wrapper.jar
+./gradle/wrapper/gradle-wrapper.properties
+./gradlew
+./gradlew.bat
+./HELP.md
+./settings.gradle
+./src
+./src/main
+./src/main/java
+./src/main/java/com
+./src/main/java/com/example
+./src/main/java/com/example/webapi
+./src/main/java/com/example/webapi/WebapiApplication.java
+./src/main/resources
+./src/main/resources/application.properties
+./src/main/resources/static
+./src/main/resources/templates
+./src/test
+./src/test/java
+./src/test/java/com
+./src/test/java/com/example
+./src/test/java/com/example/webapi
+./src/test/java/com/example/webapi/WebapiApplicationTests.java
+</div></code></code></pre>
+<h3 id="設定ファイルダウンロードとフォルダへの配置">設定ファイルダウンロードとフォルダへの配置</h3>
+<p>設定ファイル　2種類をダウンロードします。</p>
+<ul>
+<li><a href="https://hiszuk.github.io/webapi/resource/application.properties">https://hiszuk.github.io/webapi/resource/application.properties</a></li>
+<li><a href="https://hiszuk.github.io/webapi/resource/mybatis-config.xml">https://hiszuk.github.io/webapi/resource/mybatis-config.xml</a></li>
+</ul>
+<p><code>./src/main/resources</code> に配置します。<br/>
+元の<code>application.properties</code> は空なので上書きします。</p>
+<h2 id="プロジェクトのビルド">プロジェクトのビルド</h2>
+<h3 id="事前準備">事前準備</h3>
+<ul>
+<li>インストールしたMariaDBのサービスを起動しておいてください<br/>
+MariaDBがインストールできていない方は、下記のリモートDB使用方法を参照して設定ファイルを書き換えて下さい。</li>
+<li>プロキシの設定がうまくできませんでしたので、iPhoneをテザリングして実行してください</li>
+</ul>
+<h3 id="リモートdb使用方法">リモートDB使用方法</h3>
+<p><code>./src/main/resources/application.properties</code> の下記エントリを書き換えます。</p>
+<p>書換前</p>
+<pre><code><code><div>spring.datasource.url=jdbc:mysql://localhost:3306/sampledb?useJDBCCompliantTimezoneShift=true&amp;useLegacyDatetimeCode=false&amp;serverTimezone=JST&amp;useUnicode=true&amp;characterEncoding=utf-8
+spring.datasource.username=sample
+spring.datasource.password=sample
+</div></code></code></pre>
+<p>書換後</p>
+<pre><code><code><div>spring.datasource.url=jdbc:mysql://10.219.2.11:3306/sampledb?useJDBCCompliantTimezoneShift=true&amp;useLegacyDatetimeCode=false&amp;serverTimezone=JST&amp;useUnicode=true&amp;characterEncoding=utf-8
+spring.datasource.username=remote
+spring.datasource.password=remote
+</div></code></code></pre>
+<p>※<code>spring.datasource.url</code>のエントリは複数行に見えますが、実際は1行です。改行を入れないでください。</p>
+<h3 id="ビルドコマンド実行">ビルドコマンド実行</h3>
+<p>webapi のディレクトリで下記コマンドを実行します。</p>
+<pre><code class="language-cmd"><div>PS C:\home\webapi&gt; .\gradlew build
+</div></code></pre>
+<p>下記のように<code>BUILD SUCCESSFUL in 00s</code> と表示されればOKです。</p>
+<pre><code class="language-cmd"><div>Starting a Gradle Daemon (subsequent builds will be faster)
+
+&gt; Task :test
+<span class="hljs-number">2020</span>-<span class="hljs-number">07</span>-<span class="hljs-number">11</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span>:<span class="hljs-number">36</span>.<span class="hljs-number">225</span> DEBUG <span class="hljs-number">9364</span> --- [extShutdownHook] o.s.w.c.s.GenericWebApplicationContext   : Closing org.springframework.web.context.support.GenericWebApplicationContext@<span class="hljs-number">39401536</span>, started on Sat Jul <span class="hljs-number">11</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span>:<span class="hljs-number">33</span> JST <span class="hljs-number">2020</span>
+<span class="hljs-number">2020</span>-<span class="hljs-number">07</span>-<span class="hljs-number">11</span> <span class="hljs-number">16</span>:<span class="hljs-number">11</span>:<span class="hljs-number">36</span>.<span class="hljs-number">231</span>  INFO <span class="hljs-number">9364</span> --- [extShutdownHook] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+
+BUILD SUCCESSFUL <span class="hljs-keyword">in</span> <span class="hljs-number">49</span>s
+<span class="hljs-number">5</span> actionable tasks: <span class="hljs-number">5</span> executed
+</div></code></pre>
+<p>次のようなフォルダ体系になりましたでしょうか?</p>
+<pre><code><code><div>./.gitignore
+./.gradle
+./build
+./build/classes
+./build/generated
+./build/libs
+./build/libs/webapi-0.0.1-SNAPSHOT.jar   &lt;-- これが作成モジュールです
+./build/reports
+./build/resources
+./build/test-results
+./build/tmp
+./build.gradle
+./gradle
+./gradlew
+./gradlew.bat
+./HELP.md
+./settings.gradle
+./src
+./src/main
+./src/main/java
+./src/main/java/com
+./src/main/java/com/example
+./src/main/java/com/example/webapi
+./src/main/java/com/example/webapi/WebapiApplication.java
+./src/main/resources
+./src/main/resources/application.properties
+./src/main/resources/mybatis-config.xml
+./src/main/resources/static
+./src/main/resources/templates
+./src/test
+./src/test/java
+./src/test/java/com
+./src/test/java/com/example
+./src/test/java/com/example/webapi
+./src/test/java/com/example/webapi/WebapiApplicationTests.java
+</div></code></code></pre>
+<p><strong>※ここまでくれば、iphoneのテザリングを切っても構いません。</strong></p>
+<h2 id="動作確認用ページの作成">動作確認用ページの作成</h2>
+<h3 id="フォルダ体系を作成">フォルダ体系を作成</h3>
+<p>先ほど説明したレイヤー構造に基づいたフォルダを作成してください。</p>
+<pre><code><code><div>src/main/java/com/example/webapi/controller
+src/main/java/com/example/webapi/entity
+src/main/java/com/example/webapi/repository
+src/main/java/com/example/webapi/service
+src/main/resources/com/example/webapi/repository
+</div></code></code></pre>
+<h3 id="動作確認用ページ作成">動作確認用ページ作成</h3>
+<p><code>controller</code> 配下に <code>StartPageController.java</code> を新規ファイルで作成してください。</p>
+<p><code>StartPageController.java</code>　の中身は次のように記載します。</p>
+<pre><code class="language-java"><div><span class="hljs-keyword">package</span> com.example.webapi.controller;
+
+<span class="hljs-keyword">import</span> org.springframework.stereotype.Controller;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.ResponseBody;
+
+<span class="hljs-meta">@Controller</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">StartPageController</span> </span>{
+	<span class="hljs-meta">@RequestMapping</span>(<span class="hljs-string">"/"</span>)
+	<span class="hljs-meta">@ResponseBody</span>
+	<span class="hljs-function"><span class="hljs-keyword">public</span> String <span class="hljs-title">home</span><span class="hljs-params">()</span> </span>{
+		<span class="hljs-keyword">return</span> <span class="hljs-string">"The backend is started..."</span>;
+	}
+}
+</div></code></pre>
+<h3 id="ビルドします">ビルドします</h3>
+<pre><code class="language-cmd"><div>PS C:\home\webapi&gt; .\gradlew build
+
+&gt; Task :test
+<span class="hljs-number">2020</span>-<span class="hljs-number">06</span>-<span class="hljs-number">27</span> <span class="hljs-number">11</span>:<span class="hljs-number">40</span>:<span class="hljs-number">05</span>.<span class="hljs-number">727</span> DEBUG <span class="hljs-number">11864</span> --- [extShutdownHook] o.s.w.c.s.GenericWebApplicationContext   : Closing org.springframework.web.context.support.GenericWebApplicationContext@<span class="hljs-number">39401536</span>, started on Sat Jun <span class="hljs-number">27</span> <span class="hljs-number">11</span>:<span class="hljs-number">40</span>:<span class="hljs-number">01</span> JST <span class="hljs-number">2020</span>
+<span class="hljs-number">2020</span>-<span class="hljs-number">06</span>-<span class="hljs-number">27</span> <span class="hljs-number">11</span>:<span class="hljs-number">40</span>:<span class="hljs-number">05</span>.<span class="hljs-number">733</span>  INFO <span class="hljs-number">11864</span> --- [extShutdownHook] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+
+BUILD SUCCESSFUL <span class="hljs-keyword">in</span> <span class="hljs-number">17</span>s
+<span class="hljs-number">5</span> actionable tasks: <span class="hljs-number">3</span> executed, <span class="hljs-number">2</span> up-to-<span class="hljs-built_in">date</span>
+</div></code></pre>
+<h3 id="起動します">起動します</h3>
+<p>作成されたjarファイルを起動します。</p>
+<p>起動方法は3種類あります。</p>
+<ol>
+<li>SPRING-BOOT DASHBOARDから起動<br/>開発中はデバッグもでき、おすすめのモードです。ソース変更して保存すると自動でリロードがかかります。</li>
+<li>gradlewで起動<br/>ダッシュボードに出てこない場合この方法で起動できます。メモリをそれなりに使います。</li>
+<li>コマンドラインから起動<br/>運用はこの起動方式です。</li>
+</ol>
+<h3 id="ダッシュボードから起動">ダッシュボードから起動</h3>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-1-02.png" alt=""></p>
+<p>起動すると以下のような画面となります。</p>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-1-03.png" alt=""></p>
+<h3 id="gradlewで起動">gradlewで起動</h3>
+<pre><code><code><div>PS C:\home\webapi&gt; .\gradlew bootRun
+</div></code></code></pre>
+<p>以下のような起動画面になります。</p>
+<p>終了するには　<code>Ctrl+C</code> を入力します。</p>
+<pre><code><code><div>&gt; Task :bootRun
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v2.3.1.RELEASE)
+
+2020-07-11 16:45:03.419  INFO 16132 --- [  restartedMain] com.example.webapi.WebapiApplication     : Starting WebapiApplication on DZA201803906 with PID 16132 (C:\home\׋\20_RESTAPI\ch2-1\webapi\build\classes\java\main 
+	:
+	:
+2020-07-11 16:45:06.550  INFO 16132 --- [  restartedMain] com.example.webapi.WebapiApplication     : Started WebapiApplication in 3.496 seconds (JVM running for 3.996)
+&lt;=========----&gt; 75% EXECUTING [18s]
+&gt; :bootRun
+</div></code></code></pre>
+<h3 id="コマンドラインから起動">コマンドラインから起動</h3>
+<pre><code><code><div>PS C:\home\webapi&gt; cd build\libs
+PS C:\home\webapi\build\libs&gt; java -jar webapi-0.0.1-SNAPSHOT.jar
+</div></code></code></pre>
+<p>以下のような起動画面になります。</p>
+<p>終了するには　<code>Ctrl+C</code> を入力します。</p>
+<pre><code><code><div>  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v2.3.1.RELEASE)
+
+2020-07-11 16:56:37.359  INFO 13944 --- [           main] com.example.webapi.WebapiApplication     : Starting WebapiApplication on DZA201803906 with PID 13944 (C:\home\׋\20_RESTAPI\ch2-1\webapi\build\libs\webapi-0.0.1-SNAPSHOT.jar started by katouhis in C:\home\׋\20_RESTAPI\ch2-1\webapi\build\libs)
+	:
+	:
+2020-07-11 16:56:41.518  INFO 13944 --- [           main] com.example.webapi.WebapiApplication     : Started WebapiApplication in 4.953 seconds (JVM running for 5.633)
+</div></code></code></pre>
+<h2 id="動作確認">動作確認</h2>
+<h3 id="webブラウザで確認">WEBブラウザで確認</h3>
+<p>WEBブラウザより、下記URLを入力し画面表示されることを確認する。</p>
+<pre><code><code><div>http://localhost:2000/
+</div></code></code></pre>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-1-04.png" alt=""></p>
+<h3 id="postmanで確認">Postmanで確認</h3>
+<p>Postmanをインストールしていると思いますので、そちらでも確認します。</p>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-1-05.png" alt=""></p>
+<h2 id="まとめ">まとめ</h2>
+<p>今回は、Spring Initializrを利用した新規プロジェクト作成から動作確認用ページ作成・動作確認まで行いました。</p>
+<p>イニシャライザを使えば、様々なタイプのひな形が作れることが体験できたと思います。</p>
+<p>次回より、検索機能などのバックエンドの機能を実装していきます。</p>
+
+    </body>
+    </html>
