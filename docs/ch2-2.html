@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>バックエンド第2回 検索機能の実装</title>
+        <style>
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="バックエンド第2回-検索機能の実装">バックエンド第2回 検索機能の実装</h1>
+<ul>
+<li><a href="#%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89%E7%AC%AC2%E5%9B%9E-%E6%A4%9C%E7%B4%A2%E6%A9%9F%E8%83%BD%E3%81%AE%E5%AE%9F%E8%A3%85">バックエンド第2回 検索機能の実装</a>
+<ul>
+<li><a href="#%E6%A4%9C%E7%B4%A2%E6%A9%9F%E8%83%BD%E4%BB%95%E6%A7%98">検索機能仕様</a>
+<ul>
+<li><a href="#restful-apicontroller%E4%BB%95%E6%A7%98">RESTful API(Controller)仕様</a></li>
+<li><a href="#entity%E4%BB%95%E6%A7%98">ENTITY仕様</a></li>
+<li><a href="#repository%E4%BB%95%E6%A7%98">REPOSITORY仕様</a></li>
+<li><a href="#service%E4%BB%95%E6%A7%98">SERVICE仕様</a></li>
+</ul>
+</li>
+<li><a href="#entity%E5%AE%9F%E8%A3%85">ENTITY実装</a>
+<ul>
+<li><a href="#data%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">@Dataアノテーションについて</a></li>
+</ul>
+</li>
+<li><a href="#repositoryjava%E5%AE%9F%E8%A3%85">REPOSITORY(java)実装</a>
+<ul>
+<li><a href="#mapper%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6">@Mapperアノテーションについて</a></li>
+</ul>
+</li>
+<li><a href="#repositoryxml%E5%AE%9F%E8%A3%85">REPOSITORY(xml)実装</a>
+<ul>
+<li><a href="#namespace">namespace</a></li>
+<li><a href="#resulttype">resultType</a></li>
+</ul>
+</li>
+<li><a href="#service%E5%AE%9F%E8%A3%85">SERVICE実装</a>
+<ul>
+<li><a href="#service%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">@Serviceアノテーション</a></li>
+<li><a href="#transactional%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">@Transactionalアノテーション</a></li>
+<li><a href="#autowired%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">@Autowiredアノテーション</a></li>
+</ul>
+</li>
+<li><a href="#controller%E5%AE%9F%E8%A3%85">CONTROLLER実装</a>
+<ul>
+<li><a href="#restcontroller%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">@RestControllerアノテーション</a></li>
+<li><a href="#requestmapping%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">@RequestMappingアノテーション</a></li>
+<li><a href="#crossorigin%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">@CrossOriginアノテーション</a></li>
+<li><a href="#autowired%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3-1">@Autowiredアノテーション</a></li>
+<li><a href="#getmapping%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">@GetMappingアノテーション</a></li>
+</ul>
+</li>
+<li><a href="#%E3%83%93%E3%83%AB%E3%83%89%E5%8B%95%E4%BD%9C%E7%A2%BA%E8%AA%8D">ビルド・動作確認</a>
+<ul>
+<li><a href="#%E3%83%93%E3%83%AB%E3%83%89">ビルド</a></li>
+<li><a href="#%E8%B5%B7%E5%8B%95">起動</a></li>
+<li><a href="#%E5%8B%95%E4%BD%9C%E7%A2%BA%E8%AA%8D">動作確認</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="検索機能仕様">検索機能仕様</h2>
+<h3 id="restful-apicontroller仕様">RESTful API(Controller)仕様</h3>
+<p>Class名：ItemController</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">機能</th>
+<th style="text-align:center">メソッド</th>
+<th style="text-align:left">URL</th>
+<th style="text-align:left">method名</th>
+<th style="text-align:left">レスポンスボディ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">全件検索</td>
+<td style="text-align:center">GET</td>
+<td style="text-align:left">/api/items/</td>
+<td style="text-align:left">selectAll()</td>
+<td style="text-align:left">Json配列</td>
+</tr>
+<tr>
+<td style="text-align:center">1件取得</td>
+<td style="text-align:center">GET</td>
+<td style="text-align:left">/api/items/{id}</td>
+<td style="text-align:left">selectByKey(id)</td>
+<td style="text-align:left">Jsonデータ(1件)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="entity仕様">ENTITY仕様</h3>
+<p>Class名：Item</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">No.</th>
+<th style="text-align:left">フィールド名</th>
+<th style="text-align:left">型</th>
+<th style="text-align:left">説明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:left">id</td>
+<td style="text-align:left">int</td>
+<td style="text-align:left">レコードID(自動採番)</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:left">title</td>
+<td style="text-align:left">String</td>
+<td style="text-align:left">アイテムタイトル</td>
+</tr>
+<tr>
+<td style="text-align:right">3</td>
+<td style="text-align:left">content</td>
+<td style="text-align:left">String</td>
+<td style="text-align:left">アイテム内容</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:left">status</td>
+<td style="text-align:left">String</td>
+<td style="text-align:left">状態</td>
+</tr>
+</tbody>
+</table>
+<h3 id="repository仕様">REPOSITORY仕様</h3>
+<p>Interface名：ItemDao</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">No.</th>
+<th style="text-align:left">戻り値型</th>
+<th style="text-align:left">メソッド名</th>
+<th style="text-align:left">引数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:left">List&lt;Item&gt;</td>
+<td style="text-align:left">selectAll</td>
+<td style="text-align:left">なし</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:left">Item</td>
+<td style="text-align:left">selectByKey</td>
+<td style="text-align:left">int id</td>
+</tr>
+</tbody>
+</table>
+<p>Mapper名：ItemDao</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">No.</th>
+<th style="text-align:left">ディレクティブ</th>
+<th style="text-align:left">id</th>
+<th style="text-align:left">結果タイプ</th>
+<th style="text-align:left">SQL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:left">select</td>
+<td style="text-align:left">selectAll</td>
+<td style="text-align:left">com.example.webapi.entity.Item</td>
+<td style="text-align:left">select id, title, content, status<br/>from items</br>order by id</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:left">select</td>
+<td style="text-align:left">selectByKey</td>
+<td style="text-align:left">com.example.webapi.entity.Item</td>
+<td style="text-align:left">select id, title, content, status<br/>from items<br/>where id = #{id}</td>
+</tr>
+</tbody>
+</table>
+<h3 id="service仕様">SERVICE仕様</h3>
+<p>Class名：ItemService</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">No.</th>
+<th style="text-align:left">戻り値型</th>
+<th style="text-align:left">メソッド名</th>
+<th style="text-align:left">引数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:left">List&lt;Item&gt;</td>
+<td style="text-align:left">selectAll</td>
+<td style="text-align:left">なし</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:left">Item</td>
+<td style="text-align:left">selectByKey</td>
+<td style="text-align:left">int id</td>
+</tr>
+</tbody>
+</table>
+<h2 id="entity実装">ENTITY実装</h2>
+<p><code>src/main/java/com/example/webapi/entity</code>に<code>Item.java</code>を作成します。</p>
+<p><code>Item.java:</code></p>
+<pre><code class="language-Java"><div><span class="hljs-keyword">package</span> com.example.webapi.entity;
+
+<span class="hljs-keyword">import</span> java.io.Serializable;
+
+<span class="hljs-keyword">import</span> lombok.Data;
+
+<span class="hljs-meta">@Data</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Item</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">Serializable</span></span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-keyword">long</span> serialVersionUID = <span class="hljs-number">1L</span>;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> id;
+    <span class="hljs-keyword">private</span> String title;
+    <span class="hljs-keyword">private</span> String content;
+    <span class="hljs-keyword">private</span> String status;
+}
+</div></code></pre>
+<h3 id="dataアノテーションについて">@Dataアノテーションについて</h3>
+<p>通常、JavaBeansは次のルールを満たしている必要があります。<br/>
+(JavaBeansについては、こちらが参考になります。=&gt; <a href="https://engineer-club.jp/java-beans">https://engineer-club.jp/java-beans</a> )</p>
+<ol>
+<li>プロパティへのgetter/setterメソッドを持つ</li>
+<li>引数のないコンストラクタを持つ</li>
+<li>java.io.Serializableを実装している</li>
+</ol>
+<pre><code class="language-java"><div><span class="hljs-comment">// コンストラクタ</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Item</span><span class="hljs-params">()</span> </span>{
+}
+<span class="hljs-comment">// 各フィールドのSetter/Getter</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">getId</span><span class="hljs-params">()</span> </span>{
+	<span class="hljs-keyword">return</span> <span class="hljs-keyword">this</span>.id;
+}
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">setId</span><span class="hljs-params">(<span class="hljs-keyword">int</span> id)</span> </span>{
+	<span class="hljs-keyword">this</span>.id = id;
+}
+:
+これらを省略可能になるのです
+</div></code></pre>
+<p>＠Dataアノテーションを利用することにより、Lombokの機能でコンパイル時に自動で<code>setter, getter, equals, toString</code>などのメソッドを自動で生成してくれるようになります。これにより、決まりきったコードを書く手間を省けます。</p>
+<h2 id="repositoryjava実装">REPOSITORY(java)実装</h2>
+<p><code>src/main/java/com/example/webapi/repository</code>に<code>ItemDao.java</code>を作成します。</p>
+<p><code>ItemDao.java:</code></p>
+<pre><code class="language-Java"><div><span class="hljs-keyword">package</span> com.example.webapi.repository;
+
+<span class="hljs-keyword">import</span> java.util.List;
+
+<span class="hljs-keyword">import</span> com.example.webapi.entity.Item;
+
+<span class="hljs-keyword">import</span> org.apache.ibatis.annotations.Mapper;
+
+<span class="hljs-meta">@Mapper</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">ItemDao</span> </span>{
+
+    <span class="hljs-function">List&lt;Item&gt; <span class="hljs-title">selectAll</span><span class="hljs-params">()</span></span>;
+    
+    <span class="hljs-function">Item <span class="hljs-title">selectByKey</span><span class="hljs-params">(<span class="hljs-keyword">int</span> id)</span></span>;
+
+}
+</div></code></pre>
+<h3 id="mapperアノテーションについて">@Mapperアノテーションについて</h3>
+<p>MyBATISのXMLにSQLを記述して、それを実行する機能を使う場合に必要です。</p>
+<p><code>Item</code>に対するCURDの操作を提供するインターフェースを定義します。<br/>
+実際のSQLは<code>resource</code>の同じ階層でクラス名と同じXMLに記載します。</p>
+<h2 id="repositoryxml実装">REPOSITORY(xml)実装</h2>
+<p><code>src/main/resources/com/example/webapi/repository</code>に<code>ItemDao.xml</code>を作成します。</p>
+<p><code>ItemDao.xml:</code></p>
+<pre><code class="language-xml"><div><span class="hljs-comment">&lt;!--?xml version="1.0" encoding="UTF-8" ?--&gt;</span>
+<span class="hljs-meta">&lt;!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" &gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">mapper</span> <span class="hljs-attr">namespace</span>=<span class="hljs-string">"com.example.webapi.repository.ItemDao"</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"selectAll"</span> <span class="hljs-attr">resultType</span>=<span class="hljs-string">"com.example.webapi.entity.Item"</span>&gt;</span>
+        select id, title, content, status from items order by id
+    <span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">select</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"selectByKey"</span> <span class="hljs-attr">resultType</span>=<span class="hljs-string">"com.example.webapi.entity.Item"</span>&gt;</span>
+        select id, title, content, status from items where id = #{id}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">select</span>&gt;</span>
+
+<span class="hljs-tag">&lt;/<span class="hljs-name">mapper</span>&gt;</span>
+</div></code></pre>
+<h3 id="namespace">namespace</h3>
+<p>namespaceには対応するJavaのクラス(<code>com.example.webapi.repository.ItemDao</code>)を設定します。</p>
+<h3 id="resulttype">resultType</h3>
+<p>resultTypeにはItemのクラス(<code>com.example.webapi.entity.Item</code>)を設定します。</p>
+<p>これにより、クエリの結果が、<code>List&lt;Item&gt;</code>や<code>Item</code>にセットされます。</p>
+<h2 id="service実装">SERVICE実装</h2>
+<p><code>src/main/java/com/example/webapi/service</code>に<code>ItemService.java</code>を作成します。</p>
+<p><code>ItemService.java:</code></p>
+<pre><code class="language-java"><div><span class="hljs-keyword">package</span> com.example.webapi.service;
+
+<span class="hljs-keyword">import</span> java.util.List;
+
+<span class="hljs-keyword">import</span> com.example.webapi.entity.Item;
+<span class="hljs-keyword">import</span> com.example.webapi.repository.ItemDao;
+
+<span class="hljs-keyword">import</span> org.springframework.beans.factory.annotation.Autowired;
+<span class="hljs-keyword">import</span> org.springframework.stereotype.Service;
+<span class="hljs-keyword">import</span> org.springframework.transaction.annotation.Transactional;
+
+<span class="hljs-meta">@Service</span>
+<span class="hljs-meta">@Transactional</span>(readOnly = <span class="hljs-keyword">true</span>)
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ItemService</span> </span>{
+
+    <span class="hljs-meta">@Autowired</span>
+    <span class="hljs-keyword">private</span> ItemDao itemMapper;
+
+    <span class="hljs-meta">@Transactional</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> List&lt;Item&gt; <span class="hljs-title">selectAll</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> itemMapper.selectAll();
+    }
+
+    <span class="hljs-meta">@Transactional</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Item <span class="hljs-title">selectByKey</span><span class="hljs-params">(<span class="hljs-keyword">int</span> id)</span> </span>{
+        <span class="hljs-keyword">return</span> itemMapper.selectByKey( id );
+    }
+
+}
+</div></code></pre>
+<h3 id="serviceアノテーション">@Serviceアノテーション</h3>
+<p>Spring BootにこのクラスがServiceであることを知らせます。<br/>
+このアノテーションが設定されると、クラスがDIコンテナへの登録対象としてマークされます。</p>
+<h3 id="transactionalアノテーション">@Transactionalアノテーション</h3>
+<p>クラスに設定するとクラス全体でトランザクション管理が可能になります。<br/>
+通常はServiceレベルでトランザクション管理を行います。</p>
+<p><code>readOnly = true</code>に関して</p>
+<p>クラス全体を読み込み専用として設定します。<br/>
+個別のメソッドで<code>readOnly = false</code>に設定することで更新系に対応します。</p>
+<h3 id="autowiredアノテーション">@Autowiredアノテーション</h3>
+<p>DIコンテナへ登録されたインスタンスを注入したい箇所に設定します。<br/>
+サンプルの場合、<code>ItemDao</code>のMapperを注入することで、そのメソッドを利用可能にします。</p>
+<p>(参考)　DIコンテナについて<br/>
+<a href="https://qiita.com/gksdyd88/items/7886f54ee8a22d311400">https://qiita.com/gksdyd88/items/7886f54ee8a22d311400</a>　<br/>
+<a href="https://qiita.com/park-jh/items/4df5c67d895b2ea219d6">https://qiita.com/park-jh/items/4df5c67d895b2ea219d6</a></p>
+<h2 id="controller実装">CONTROLLER実装</h2>
+<p><code>src/main/java/com/example/webapi/controller</code>に<code>ItemController.java</code>を作成します。</p>
+<p><code>ItemController.java:</code></p>
+<pre><code class="language-java"><div><span class="hljs-keyword">package</span> com.example.webapi.controller;
+
+<span class="hljs-keyword">import</span> java.util.List;
+
+<span class="hljs-keyword">import</span> com.example.webapi.entity.Item;
+<span class="hljs-keyword">import</span> com.example.webapi.service.ItemService;
+
+<span class="hljs-keyword">import</span> org.springframework.beans.factory.annotation.Autowired;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.CrossOrigin;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.GetMapping;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.PathVariable;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.RequestMapping;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.RestController;
+
+<span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping</span>(<span class="hljs-string">"api"</span>)
+<span class="hljs-meta">@CrossOrigin</span>
+<span class="hljs-keyword">public</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ItemController</span> </span>{
+
+    <span class="hljs-meta">@Autowired</span> 
+    <span class="hljs-keyword">private</span> ItemService itemService;
+
+    <span class="hljs-meta">@GetMapping</span>(value = <span class="hljs-string">"/items"</span>)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> List&lt;Item&gt; <span class="hljs-title">selectAll</span><span class="hljs-params">()</span> </span>{
+        <span class="hljs-keyword">return</span> itemService.selectAll();
+    }
+
+    <span class="hljs-meta">@GetMapping</span>(value = <span class="hljs-string">"/items/{id}"</span>)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> Item <span class="hljs-title">selectByKey</span><span class="hljs-params">(@PathVariable <span class="hljs-keyword">int</span> id)</span> </span>{
+        <span class="hljs-keyword">return</span> itemService.selectByKey( id );
+    }
+
+}
+</div></code></pre>
+<h3 id="restcontrollerアノテーション">@RestControllerアノテーション</h3>
+<p>SpringBootでRESTful APIを作るときのお約束です。</p>
+<h3 id="requestmappingアノテーション">@RequestMappingアノテーション</h3>
+<p>URLが<code>/api</code>で始まるものが評価されます。</p>
+<h3 id="crossoriginアノテーション">@CrossOriginアノテーション</h3>
+<p>別のサーバー(例えばフロントエンドが別ポートや別サーバー)からAPIコールされる場合、これを付けないと不正なアクセスとして扱われる。</p>
+<h3 id="autowiredアノテーション-1">@Autowiredアノテーション</h3>
+<p>ここでは、<code>ItemService</code>クラスのメソッドを使いたいので、インスタンスを注入する。</p>
+<h3 id="getmappingアノテーション">@GetMappingアノテーション</h3>
+<p>メソッドが<code>GET</code>の場合に評価される。<br/>
+<code>value = &quot;xxx&quot;</code>で/api以降のURLを取り出し、合致したものが実行される。</p>
+<ul>
+<li>/api/items -&gt; selectAll がコールされる</li>
+<li>/api/items/1 -&gt; selectByKey(1)がコールされる</li>
+</ul>
+<p><code>@PathVariable</code>はPathに含まれる変数を取得する。<br/>
+サンプルの場合URLの<code>{id}</code>に設定された値を<code>int id</code>として取り出す。</p>
+<hr>
+<h2 id="ビルド動作確認">ビルド・動作確認</h2>
+<h3 id="ビルド">ビルド</h3>
+<p>gradlew buildでビルドします。</p>
+<pre><code><code><div>PS C:\home\webapi&gt; ./gradlew build
+
+&gt; Task :test
+2020-07-11 22:49:08.994 DEBUG 20096 --- [extShutdownHook] o.s.w.c.s.GenericWebApplicationContext   : Closing org.springframework.web.context.support.GenericWebApplicationContext@39401536, started on Sat Jul 11 22:49:05 JST 2020
+2020-07-11 22:49:09.000  INFO 20096 --- [extShutdownHook] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+
+BUILD SUCCESSFUL in 17s
+5 actionable tasks: 5 executed
+</div></code></code></pre>
+<h3 id="起動">起動</h3>
+<p>SPRING-BOOT DASHBOARDでwebapiを起動します。</p>
+<h3 id="動作確認">動作確認</h3>
+<p>Postmanを起動し、下記URLにアクセス(GET)して動作結果を確認します。</p>
+<pre><code><code><div>http://localhost:2000/api/items/
+</div></code></code></pre>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-2-01.png" alt=""></p>
+<pre><code><code><div>http://localhost:2000/api/items/7/
+</div></code></code></pre>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-2-02.png" alt=""></p>
+<hr>
+<p>APIからは応答が返ってきたでしょうか？</p>
+<p>CH2-2はこれで終了します。</p>
+<p>次回は編集・削除・新規登録を一気にやりたいと思います。</p>
+
+    </body>
+    </html>
