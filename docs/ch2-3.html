@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>バックエンド第3回 更新・削除・登録の実装</title>
+        <style>
+</style>
+        
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        
+        
+        
+    </head>
+    <body class="vscode-light">
+        <h1 id="バックエンド第3回-更新削除登録の実装">バックエンド第3回 更新・削除・登録の実装</h1>
+<ul>
+<li><a href="#%E3%83%90%E3%83%83%E3%82%AF%E3%82%A8%E3%83%B3%E3%83%89%E7%AC%AC3%E5%9B%9E-%E6%9B%B4%E6%96%B0%E5%89%8A%E9%99%A4%E7%99%BB%E9%8C%B2%E3%81%AE%E5%AE%9F%E8%A3%85">バックエンド第3回 更新・削除・登録の実装</a>
+<ul>
+<li><a href="#%E6%9B%B4%E6%96%B0%E6%A9%9F%E8%83%BD%E4%BB%95%E6%A7%98">更新機能仕様</a>
+<ul>
+<li><a href="#restful-apicontroller%E4%BB%95%E6%A7%98">RESTful API(Controller)仕様</a></li>
+<li><a href="#repository%E4%BB%95%E6%A7%98">REPOSITORY仕様</a></li>
+<li><a href="#service%E4%BB%95%E6%A7%98">SERVICE仕様</a></li>
+</ul>
+</li>
+<li><a href="#repositoryjava%E5%AE%9F%E8%A3%85">REPOSITORY(java)実装</a></li>
+<li><a href="#repositoryxml%E5%AE%9F%E8%A3%85">REPOSITORY(xml)実装</a>
+<ul>
+<li><a href="#update%E3%81%AB%E9%96%A2%E3%81%97%E3%81%A6">updateに関して</a></li>
+<li><a href="#insert%E3%81%AB%E9%96%A2%E3%81%97%E3%81%A6">insertに関して</a></li>
+</ul>
+</li>
+<li><a href="#service%E5%AE%9F%E8%A3%85">SERVICE実装</a>
+<ul>
+<li><a href="#transactional%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">@Transactionalアノテーション</a></li>
+</ul>
+</li>
+<li><a href="#controller%E5%AE%9F%E8%A3%85">CONTROLLER実装</a>
+<ul>
+<li><a href="#putmapping%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">@PutMappingアノテーション</a></li>
+<li><a href="#deletemapping%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">@DeleteMappingアノテーション</a></li>
+<li><a href="#postmapping%E3%82%A2%E3%83%8E%E3%83%86%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3">@PostMappingアノテーション</a></li>
+</ul>
+</li>
+<li><a href="#%E3%83%93%E3%83%AB%E3%83%89%E5%8B%95%E4%BD%9C%E7%A2%BA%E8%AA%8D">ビルド・動作確認</a>
+<ul>
+<li><a href="#%E3%83%93%E3%83%AB%E3%83%89">ビルド</a></li>
+<li><a href="#%E8%B5%B7%E5%8B%95">起動</a></li>
+<li><a href="#%E6%9B%B4%E6%96%B0%E5%8B%95%E4%BD%9C%E7%A2%BA%E8%AA%8D">更新動作確認</a></li>
+<li><a href="#%E6%9B%B4%E6%96%B0%E6%96%B0%E8%A6%8F%E7%99%BB%E9%8C%B2%E5%8B%95%E4%BD%9C%E7%A2%BA%E8%AA%8D">更新(新規登録)動作確認</a></li>
+<li><a href="#%E5%89%8A%E9%99%A4%E6%A9%9F%E8%83%BD%E7%A2%BA%E8%AA%8D">削除機能確認</a></li>
+<li><a href="#%E6%96%B0%E8%A6%8F%E7%99%BB%E9%8C%B2%E6%A9%9F%E8%83%BD%E7%A2%BA%E8%AA%8D">新規登録機能確認</a></li>
+</ul>
+</li>
+<li><a href="#%E3%81%BE%E3%81%A8%E3%82%81">まとめ</a></li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="更新機能仕様">更新機能仕様</h2>
+<h3 id="restful-apicontroller仕様">RESTful API(Controller)仕様</h3>
+<p>Class名：ItemController</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">機能</th>
+<th style="text-align:center">メソッド</th>
+<th style="text-align:left">URL</th>
+<th style="text-align:left">method名</th>
+<th style="text-align:left">レスポンスボディ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1件更新</td>
+<td style="text-align:center">PUT</td>
+<td style="text-align:left">/api/items/{id}</td>
+<td style="text-align:left">updateByKey(id)</td>
+<td style="text-align:left">void</td>
+</tr>
+<tr>
+<td style="text-align:center">1件削除</td>
+<td style="text-align:center">DELETE</td>
+<td style="text-align:left">/api/items/{id}</td>
+<td style="text-align:left">deleteByKey(id)</td>
+<td style="text-align:left">void</td>
+</tr>
+<tr>
+<td style="text-align:center">新規登録</td>
+<td style="text-align:center">POST</td>
+<td style="text-align:left">/api/items/</td>
+<td style="text-align:left">createNew(param)</td>
+<td style="text-align:left">int id</td>
+</tr>
+</tbody>
+</table>
+<h3 id="repository仕様">REPOSITORY仕様</h3>
+<p>Interface名：ItemDao</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">No.</th>
+<th style="text-align:left">戻り値型</th>
+<th style="text-align:left">メソッド名</th>
+<th style="text-align:left">引数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">3</td>
+<td style="text-align:left">void</td>
+<td style="text-align:left">updateByKey</td>
+<td style="text-align:left">Item item</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:left">void</td>
+<td style="text-align:left">deleteByKey</td>
+<td style="text-align:left">int id</td>
+</tr>
+<tr>
+<td style="text-align:right">5</td>
+<td style="text-align:left">void</td>
+<td style="text-align:left">createNew</td>
+<td style="text-align:left">Item item</td>
+</tr>
+</tbody>
+</table>
+<p>Mapper名：ItemDao</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">No.</th>
+<th style="text-align:left">ディレクティブ</th>
+<th style="text-align:left">id</th>
+<th style="text-align:left">パラメータタイプ</th>
+<th style="text-align:left">SQL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">3</td>
+<td style="text-align:left">update</td>
+<td style="text-align:left">updateByKey</td>
+<td style="text-align:left">com.example.webapi.entity.Item</td>
+<td style="text-align:left">insert into items (id, title, content, status, created, updated)<br/>values ( #{id}, #{title}, #{content}, #{status}, now(), now() )<br/>on duplicate key update<br/>title = #{title}, content = #{content}, status = #{status}, updated = now()</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:left">delete</td>
+<td style="text-align:left">deleteByKey</td>
+<td style="text-align:left">int</td>
+<td style="text-align:left">delete from items where id = #{id}</td>
+</tr>
+<tr>
+<td style="text-align:right">5</td>
+<td style="text-align:left">insert</td>
+<td style="text-align:left">createNew</td>
+<td style="text-align:left">com.example.webapi.entity.Item</td>
+<td style="text-align:left">insert into items (title, content, status, created, updated)<br/>values ( #{title}, #{content}, #{status}, now(), now() )</td>
+</tr>
+</tbody>
+</table>
+<h3 id="service仕様">SERVICE仕様</h3>
+<p>Class名：ItemService</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">No.</th>
+<th style="text-align:left">戻り値型</th>
+<th style="text-align:left">メソッド名</th>
+<th style="text-align:left">引数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">3</td>
+<td style="text-align:left">void</td>
+<td style="text-align:left">updateByKey</td>
+<td style="text-align:left">Item item</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:left">void</td>
+<td style="text-align:left">deleteByKey</td>
+<td style="text-align:left">int id</td>
+</tr>
+<tr>
+<td style="text-align:right">5</td>
+<td style="text-align:left">int</td>
+<td style="text-align:left">createNew</td>
+<td style="text-align:left">Item item</td>
+</tr>
+</tbody>
+</table>
+<h2 id="repositoryjava実装">REPOSITORY(java)実装</h2>
+<p><code>src/main/java/com/example/webapi/repository</code>の<code>ItemDao.java</code>に追加します。</p>
+<p><code>ItemDao.java:</code>
+<code>public interface ItemDao {}</code> に以下を追加します。</p>
+<pre><code class="language-Java"><div>    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">updateByKey</span><span class="hljs-params">(Item item)</span></span>;
+    
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">deleteByKey</span><span class="hljs-params">(<span class="hljs-keyword">int</span> id)</span></span>;
+
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">createNew</span><span class="hljs-params">(Item item)</span></span>;
+</div></code></pre>
+<h2 id="repositoryxml実装">REPOSITORY(xml)実装</h2>
+<p><code>src/main/resources/com/example/webapi/repository</code>の<code>ItemDao.xml</code>に追加します。</p>
+<p><code>ItemDao.xml:</code>
+<code>&lt;mappaer&gt; ~ &lt;/mapper&gt;</code>の<code>selectByKey</code>の下に以下を追加します。</p>
+<pre><code class="language-xml"><div>    <span class="hljs-tag">&lt;<span class="hljs-name">update</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"updateByKey"</span> <span class="hljs-attr">parameterType</span>=<span class="hljs-string">"com.example.webapi.entity.Item"</span>&gt;</span>
+        insert into items (id, title, content, status, created, updated) 
+        values ( #{id}, #{title}, #{content}, #{status}, now(), now() ) 
+        on duplicate key update
+        title = #{title}, content = #{content}, status = #{status}, updated = now()
+    <span class="hljs-tag">&lt;/<span class="hljs-name">update</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">delete</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"deleteByKey"</span> <span class="hljs-attr">parameterType</span>=<span class="hljs-string">"int"</span>&gt;</span>
+        delete from items where id = #{id}
+    <span class="hljs-tag">&lt;/<span class="hljs-name">delete</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">insert</span> <span class="hljs-attr">id</span>=<span class="hljs-string">"createNew"</span> <span class="hljs-attr">useGeneratedKeys</span>=<span class="hljs-string">"true"</span> <span class="hljs-attr">keyProperty</span>=<span class="hljs-string">"id"</span> <span class="hljs-attr">parameterType</span>=<span class="hljs-string">"com.example.webapi.entity.Item"</span>&gt;</span>
+        insert into items (title, content, status, created, updated) 
+        values ( #{title}, #{content}, #{status}, now(), now() ) 
+    <span class="hljs-tag">&lt;/<span class="hljs-name">insert</span>&gt;</span>
+</div></code></pre>
+<h3 id="updateに関して">updateに関して</h3>
+<p><strong>PUTの仕様</strong>として、更新KEYが存在すればUPDATE、存在しなければINSERTですので、MySQLでは <code>insert ~ on duplicate key update ~</code> を使います。</p>
+<h3 id="insertに関して">insertに関して</h3>
+<p>INSERT後に自動生成したIDを取得してフロントエンド側に返す必要があるので、以下の設定をします。
+<code>useGeneratedKeys=&quot;true&quot; keyProperty=&quot;id&quot;</code></p>
+<p>この設定をしておくと、service層で<code>item.getId()</code>することで生成されたIDを取得できます。</p>
+<h2 id="service実装">SERVICE実装</h2>
+<p><code>src/main/java/com/example/webapi/service</code>の<code>ItemService.java</code>に追加します。</p>
+<p><code>ItemService.java:</code>の<code>selectByKey</code>の下に以下を追加します。</p>
+<pre><code class="language-java"><div>    <span class="hljs-meta">@Transactional</span>(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = <span class="hljs-keyword">false</span>)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">updateByKey</span><span class="hljs-params">(Item item)</span> </span>{
+        itemMapper.updateByKey( item );
+    }
+
+    <span class="hljs-meta">@Transactional</span>(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = <span class="hljs-keyword">false</span>)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">deleteByKey</span><span class="hljs-params">(<span class="hljs-keyword">int</span> id)</span> </span>{
+        itemMapper.deleteByKey( id );
+    }
+
+    <span class="hljs-meta">@Transactional</span>(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = <span class="hljs-keyword">false</span>)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">createNew</span><span class="hljs-params">(Item item)</span> </span>{
+        itemMapper.createNew( item );
+        <span class="hljs-keyword">return</span> item.getId();
+    }
+</div></code></pre>
+<h3 id="transactionalアノテーション">@Transactionalアノテーション</h3>
+<p>トランザクションを書き込み可能(<code>readOnly = false</code>)に設定し、<br/>
+全ての例外を補足し、発生した場合ROLLBACKする(<code>rollbackFor = Exception.class</code>)よう設定します。<br/>
+<code>propagation</code>に関しては、<code>REQUIRED:</code> 「トランザクションが開始されていなければ新規に開始し、すでに開始されていればそのトランザクションをそのまま利用する」に設定します。</p>
+<p>参考URL： <a href="https://qiita.com/NagaokaKenichi/items/a279857cc2d22a35d0dd">https://qiita.com/NagaokaKenichi/items/a279857cc2d22a35d0dd</a></p>
+<h2 id="controller実装">CONTROLLER実装</h2>
+<p><code>src/main/java/com/example/webapi/controller</code>の<code>ItemController.java</code>に追加します。</p>
+<p><code>ItemController.java:</code>の<code>selectByKey</code>の下に以下を追加します。</p>
+<pre><code class="language-java"><div>    <span class="hljs-meta">@PutMapping</span>(value = <span class="hljs-string">"/items/{id}"</span>)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">updateByKey</span><span class="hljs-params">(@PathVariable <span class="hljs-keyword">int</span> id, @RequestBody Item item)</span> </span>{
+        item.setId(id);
+        itemService.updateByKey(item);
+    }
+
+    <span class="hljs-meta">@DeleteMapping</span>(value = <span class="hljs-string">"/items/{id}"</span>)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">deleteByKey</span><span class="hljs-params">(@PathVariable <span class="hljs-keyword">int</span> id)</span> </span>{
+        itemService.deleteByKey(id);
+    }
+
+    <span class="hljs-meta">@PostMapping</span>(value = <span class="hljs-string">"/items"</span>)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">int</span> <span class="hljs-title">createNew</span><span class="hljs-params">(@RequestBody Item item)</span> </span>{
+        <span class="hljs-keyword">return</span> itemService.createNew(item);
+    }
+</div></code></pre>
+<h3 id="putmappingアノテーション">@PutMappingアノテーション</h3>
+<p>メソッドが<code>PUT</code>の場合に評価される。<br/>
+<code>value = &quot;xxx&quot;</code>で/api以降のURLを取り出し、合致したものが実行される。</p>
+<ul>
+<li>/api/items/1 -&gt; updateByKey(1, item)がコールされる</li>
+</ul>
+<p><code>@PathVariable</code>はPathに含まれる変数を取得する。<br/>
+サンプルの場合URLの<code>{id}</code>に設定された値を<code>int id</code>として取り出す。</p>
+<p><code>@RequestBody</code>はフロントエンドから渡されるリクエストボディ部を取り出します。サンプルの場合、id, title, content, statusの4つの項目を持つJsonデータとなります。</p>
+<p><strong>データ例</strong></p>
+<pre><code class="language-Json"><div>{
+    <span class="hljs-attr">"id"</span>: <span class="hljs-number">10</span>,
+    <span class="hljs-attr">"title"</span>: <span class="hljs-string">"PUT更新テスト"</span>,
+    <span class="hljs-attr">"content"</span>: <span class="hljs-string">"存在しないIDは新規に登録される"</span>,
+    <span class="hljs-attr">"status"</span>: <span class="hljs-string">"PROGRESS"</span>
+}
+</div></code></pre>
+<h3 id="deletemappingアノテーション">@DeleteMappingアノテーション</h3>
+<p>メソッドが<code>DELETE</code>の場合に評価される。<br/>
+<code>value = &quot;xxx&quot;</code>で/api以降のURLを取り出し、合致したものが実行される。</p>
+<ul>
+<li>/api/items/1 -&gt; deleteByKey(1)がコールされる</li>
+</ul>
+<h3 id="postmappingアノテーション">@PostMappingアノテーション</h3>
+<p>メソッドが<code>POST</code>の場合に評価される。</p>
+<ul>
+<li>/api/items/ -&gt; createNew(item)がコールされる</li>
+</ul>
+<p><code>@RequestBody</code>でフロントエンドから渡されるリクエストボディ部を取り出します。</p>
+<hr>
+<h2 id="ビルド動作確認">ビルド・動作確認</h2>
+<h3 id="ビルド">ビルド</h3>
+<p>gradlew buildでビルドします。</p>
+<pre><code><code><div>PS C:\home\webapi&gt; ./gradlew build
+
+&gt; Task :test
+2020-07-11 22:49:08.994 DEBUG 20096 --- [extShutdownHook] o.s.w.c.s.GenericWebApplicationContext   : Closing org.springframework.web.context.support.GenericWebApplicationContext@39401536, started on Sat Jul 11 22:49:05 JST 2020
+2020-07-11 22:49:09.000  INFO 20096 --- [extShutdownHook] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+
+BUILD SUCCESSFUL in 17s
+5 actionable tasks: 5 executed
+</div></code></code></pre>
+<h3 id="起動">起動</h3>
+<p>SPRING-BOOT DASHBOARDでwebapiを起動します。</p>
+<h3 id="更新動作確認">更新動作確認</h3>
+<p>Postmanを起動し、下記URLにアクセス(GET)して更新対象データを取得します。</p>
+<pre><code><code><div>http://localhost:2000/api/items/7/
+</div></code></code></pre>
+<ol>
+<li>メソッドを<code>PUT</code>に変えます</li>
+<li>内容を<code>Body</code>を選択します</li>
+<li>形式を<code>raw</code>を選択し、フォーマットを<code>Text</code>から<code>JSON</code>に変更します</li>
+<li>結果をコピーして、body部分にペーストした後に、statusを&quot;PROGRESS&quot;に変更します</li>
+</ol>
+<pre><code class="language-json"><div>{
+    <span class="hljs-attr">"id"</span>: <span class="hljs-number">7</span>,
+    <span class="hljs-attr">"title"</span>: <span class="hljs-string">"Docker-composeでパッケージ化する"</span>,
+    <span class="hljs-attr">"content"</span>: <span class="hljs-string">"フロントエンド・バックエンド・DBの3層をひとつのパッケージにまとめる"</span>,
+    <span class="hljs-attr">"status"</span>: <span class="hljs-string">"PROGRESS"</span>
+}
+</div></code></pre>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-3-01.png" alt=""></p>
+<ol start="5">
+<li><code>Send</code>ボタンをクリックします -&gt; 応答は空になりHTTP STAUSは200で返ってくれば成功です</li>
+</ol>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-3-02.png" alt=""></p>
+<ol start="6">
+<li>メソッドを<code>GET</code>に戻して再度データを取得します　-&gt; statusが&quot;PROGRESS&quot;に変わっています</li>
+</ol>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-3-03.png" alt=""></p>
+<h3 id="更新新規登録動作確認">更新(新規登録)動作確認</h3>
+<p><code>PUT</code> で存在しないIDを更新しようとすれば新規に登録できることを確認します。</p>
+<ol>
+<li>先ほどの画面の続きで、送信データのtitleを下記のように変更します</li>
+</ol>
+<pre><code class="language-json"><div>{
+    <span class="hljs-attr">"id"</span>: <span class="hljs-number">7</span>,
+    <span class="hljs-attr">"title"</span>: <span class="hljs-string">"(NEW)Docker-composeでパッケージ化する"</span>,
+    <span class="hljs-attr">"content"</span>: <span class="hljs-string">"フロントエンド・バックエンド・DBの3層をひとつのパッケージにまとめる"</span>,
+    <span class="hljs-attr">"status"</span>: <span class="hljs-string">"PROGRESS"</span>
+}
+</div></code></pre>
+<ol start="2">
+<li>メソッドを<code>PUT</code>に変更します</li>
+<li>URLを<code>http://localhost:2000/api/items/8/</code> に変更します <strong>(重要)</strong></li>
+<li>他設定を確認し<code>Send</code>ボタンをクリックします。</li>
+</ol>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-3-04.png" alt=""></p>
+<ol start="5">
+<li>メソッドを<code>GET</code>に戻して再度データを取得します　-&gt; id=8で新規データが登録されます</li>
+</ol>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-3-05.png" alt=""></p>
+<h3 id="削除機能確認">削除機能確認</h3>
+<p><code>DELETE</code>でid指定したデータの削除を確認します。</p>
+<ol>
+<li>メソッドを<code>DELETE</code>に変更します</li>
+<li>URLは<code>http://localhost:2000/api/items/8/</code> になっていることを確認します</li>
+<li><code>Send</code> ボタンをクリックします</li>
+<li>メソッドを<code>GET</code> に変更します</li>
+<li>URLを<code>http://localhost:2000/api/items/</code> に変更します</li>
+<li><code>Send</code> ボタンをクリックします　-&gt;　id=8 のレコードが削除されています</li>
+</ol>
+<h3 id="新規登録機能確認">新規登録機能確認</h3>
+<p><code>POST</code>でデータの新規登録を確認します。自動採番されたIDが返却されることも確認します。</p>
+<ol>
+<li>メソッドを<code>POST</code>に変更します</li>
+<li>URLは<code>http://localhost:2000/api/items/</code>になっていることを確認します</li>
+<li>Body部分に下記内容の新規登録データを作成します。</li>
+</ol>
+<pre><code class="language-json"><div>{
+    <span class="hljs-attr">"id"</span>: <span class="hljs-number">99</span>,
+    <span class="hljs-attr">"title"</span>: <span class="hljs-string">"新規登録テスト"</span>,
+    <span class="hljs-attr">"content"</span>: <span class="hljs-string">"新規登録の際にID自動採番されてその値が返却される"</span>,
+    <span class="hljs-attr">"status"</span>: <span class="hljs-string">"TODO"</span>
+}
+</div></code></pre>
+<ol start="4">
+<li><code>Send</code>ボタンをクリックします　-&gt;　新規IDが返却されます。(皆さんの場合は9)</li>
+</ol>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-3-06.png" alt=""></p>
+<ol start="5">
+<li>メソッドを<code>GET</code>に変更します</li>
+<li>URLを<code>http://localhost:2000/api/items/9/</code> に変更します</li>
+<li><code>Send</code> ボタンをクリックします　-&gt;　先ほど登録した内容が表示されます</li>
+</ol>
+<p><img src="https://hiszuk.github.io/webapi/images/ch2-3-07.png" alt=""></p>
+<hr>
+<h2 id="まとめ">まとめ</h2>
+<p>バックエンド開発では、「Spring Boot」フレームワークを用いたRESTful API開発を学びました。</p>
+<p>リクエストの扱いやログ出力、例外(今回は触れていませんが)など、フレームワークが多くの部分をカバーしてくれており、開発者は、データ構造とビジネスロジック実装に集中できることが体験頂けたと思います。</p>
+<p>次週はいよいよ、フロントエンドとバックエンドを結合し、アプリとして完成させます。</p>
+
+    </body>
+    </html>
