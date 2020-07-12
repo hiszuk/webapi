@@ -46,7 +46,7 @@ public class ItemController {
     }
 
     @PostMapping(value = "/items")
-    public int createNwe(@RequestBody Item item) {
+    public int createNew(@RequestBody Item item) {
         return itemService.createNew(item);
     }
 

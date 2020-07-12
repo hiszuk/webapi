@@ -27,17 +27,17 @@ public class ItemService {
         return itemMapper.selectByKey( id );
     }
 
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = false)
     public void updateByKey(Item item) {
         itemMapper.updateByKey( item );
     }
 
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = false)
     public void deleteByKey(int id) {
         itemMapper.deleteByKey( id );
     }
 
-    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED, readOnly = false)
     public int createNew(Item item) {
         itemMapper.createNew( item );
         return item.getId();
